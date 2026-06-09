@@ -14,7 +14,7 @@ Este repositório tem como objetivo principal explorar as capacidades de agendam
 - **.NET 10**
 - **C#**
 - **Microsoft Agent Framework (MAF)**
-- **OpenAI Client
+- **OpenAI Client**
 - **UserSecrets** para gestão segura de credenciais
 
 ## Segurança (Importante!)
