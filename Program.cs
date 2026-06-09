@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using MafAgent.Tools;
+using Microsoft.Extensions.AI;
+using Microsoft.Extensions.Configuration;
 using OpenAI;
 using OpenAI.Chat;
 
@@ -13,9 +15,15 @@ var agent = new OpenAIClient(openAiKey)
                You are a C# and .NET instructor at the argus platform.
                Your feedback is technical, precise, didactic, and encouraging.
                ALWAYS respond in Brazilian Portuguese.
-               """);
+               """, tools:
+    [
+        AIFunctionFactory.Create(WeatherTool.GetWeather)
+    ]);
 
-await foreach (var token in agent.RunStreamingAsync("https://github.com/folke/tokyonight.nvim"))
+Console.WriteLine("Faça uma pergunta:");
+var prompt = Console.ReadLine();
+
+await foreach (var token in agent.RunStreamingAsync(prompt ?? string.Empty))
 {
     Console.Write(token);
 }
