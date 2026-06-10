@@ -1,4 +1,5 @@
-﻿using MafAgent.Tools;
+﻿using System.Text;
+using MafAgent.Tools;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using OpenAI;
@@ -9,7 +10,7 @@ var config = new ConfigurationBuilder()
     .Build();
 var openAiKey = config["OpenAi:ApiKey"];
 
-var agent = new OpenAIClient(openAiKey)
+var instructorAgent = new OpenAIClient(openAiKey)
     .GetChatClient("gpt-5.4-mini")
     .AsAIAgent("""
                You are a C# and .NET instructor at the argus platform.
@@ -20,19 +21,45 @@ var agent = new OpenAIClient(openAiKey)
         AIFunctionFactory.Create(WeatherTool.GetWeather)
     ]);
 
-var session = await agent.CreateSessionAsync();
+var translationAgent = new OpenAIClient(openAiKey)
+    .GetChatClient("gpt-5.4-mini")
+    .AsAIAgent("""
+               Você é um agente especialista em traduzir textos de português para inglês.
+               Sempre que lhe passarem um texto, traduza para o inglês.
+               """);
+
+var session = await instructorAgent.CreateSessionAsync();
 
 while (true)
 {
     Console.WriteLine("Faça uma pergunta:");
     var prompt = Console.ReadLine();
 
-    await foreach (var token in agent.RunStreamingAsync(prompt ?? string.Empty, session))
+    if (string.IsNullOrEmpty(prompt)) continue;
+
+    var fullResponse = new StringBuilder();
+
+    await foreach (var token in instructorAgent.RunStreamingAsync(prompt, session))
     {
         Console.Write(token);
+        fullResponse.Append(token);
     }
+
+    var responseText = fullResponse.ToString().Trim();
 
     Console.WriteLine();
     Console.WriteLine("---");
+
+    if (!string.IsNullOrEmpty(responseText))
+    {
+        await foreach (var translatedToken in translationAgent.RunStreamingAsync(responseText))
+        {
+            Console.Write(translatedToken);
+        }
+
+        Console.WriteLine();
+        Console.WriteLine("---");
+    }
+
     Console.WriteLine();
 }
