@@ -20,10 +20,19 @@ var agent = new OpenAIClient(openAiKey)
         AIFunctionFactory.Create(WeatherTool.GetWeather)
     ]);
 
-Console.WriteLine("Faça uma pergunta:");
-var prompt = Console.ReadLine();
+var session = await agent.CreateSessionAsync();
 
-await foreach (var token in agent.RunStreamingAsync(prompt ?? string.Empty))
+while (true)
 {
-    Console.Write(token);
+    Console.WriteLine("Faça uma pergunta:");
+    var prompt = Console.ReadLine();
+
+    await foreach (var token in agent.RunStreamingAsync(prompt ?? string.Empty, session))
+    {
+        Console.Write(token);
+    }
+
+    Console.WriteLine();
+    Console.WriteLine("---");
+    Console.WriteLine();
 }
