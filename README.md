@@ -36,6 +36,10 @@ Para este projeto, as chaves de acesso (API Keys) são gerenciadas via **dotnet 
 
 3.  **No código:**
     O sistema carrega essas chaves automaticamente via `IConfiguration` sem que elas apareçam nos arquivos de texto.
+    ```csharp
+    // O Código está configurado para o modelo GPT-5.4 mini (atualizar modelo conforme sua configuração)
+    .GetChatClient("gpt-5.4-mini")
+    ```
 
 ## Como Rodar
 
